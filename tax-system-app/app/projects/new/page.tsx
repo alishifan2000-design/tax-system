@@ -173,17 +173,6 @@ export default function NewProjectPage() {
         />
 
         <label className="mt-4 block text-sm">
-          Customer / Client
-        </label>
-
-        <input
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          className="mt-2 w-full rounded-xl bg-slate-800 p-3"
-          placeholder="Client or resort name"
-        />
-
-        <label className="mt-4 block text-sm">
           Contract Value (MVR)
         </label>
 

@@ -7,6 +7,10 @@ export default function Home() {
   const [organizationName, setOrganizationName] = useState("");
   const [role, setRole] = useState("");
   const [message, setMessage] = useState("Loading dashboard...");
+  const [activeProjects, setActiveProjects] = useState(0);
+  const [revenue, setRevenue] = useState(0);
+  const [expenses, setExpenses] = useState(0);
+  const [gstPayable, setGstPayable] = useState(0);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -40,6 +44,85 @@ export default function Home() {
         setMessage(organizationError.message);
         return;
       }
+
+      const { count: projectCount, error: projectError } = await supabase
+        .from("projects")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", membership.organization_id)
+        .eq("status", "active");
+
+      if (projectError) {
+        setMessage(projectError.message);
+        return;
+      }
+
+      setActiveProjects(projectCount ?? 0);
+
+      const { data: incomeTransactions, error: incomeError } = await supabase
+        .from("transactions")
+        .select("total_amount")
+        .eq("organization_id", membership.organization_id)
+        .eq("transaction_type", "income");
+
+      if (incomeError) {
+        setMessage(incomeError.message);
+        return;
+      }
+
+      const totalRevenue =
+        incomeTransactions?.reduce(
+          (sum, transaction) => sum + Number(transaction.total_amount || 0),
+          0
+        ) ?? 0;
+
+      setRevenue(totalRevenue);
+
+      const { data: expenseTransactions, error: expenseError } = await supabase
+        .from("transactions")
+        .select("total_amount")
+        .eq("organization_id", membership.organization_id)
+        .eq("transaction_type", "expense");
+
+      if (expenseError) {
+        setMessage(expenseError.message);
+        return;
+      }
+
+      const totalExpenses =
+        expenseTransactions?.reduce(
+          (sum, transaction) => sum + Number(transaction.total_amount || 0),
+          0
+        ) ?? 0;
+
+      setExpenses(totalExpenses);
+
+      const { data: gstTransactions, error: gstError } = await supabase
+        .from("transactions")
+        .select("transaction_type, gst_amount")
+        .eq("organization_id", membership.organization_id);
+
+      if (gstError) {
+        setMessage(gstError.message);
+        return;
+      }
+
+      const outputGst =
+        gstTransactions
+          ?.filter((transaction) => transaction.transaction_type === "income")
+          .reduce(
+            (sum, transaction) => sum + Number(transaction.gst_amount || 0),
+            0
+          ) ?? 0;
+
+      const inputGst =
+        gstTransactions
+          ?.filter((transaction) => transaction.transaction_type === "expense")
+          .reduce(
+            (sum, transaction) => sum + Number(transaction.gst_amount || 0),
+            0
+          ) ?? 0;
+
+      setGstPayable(outputGst - inputGst);
 
       setOrganizationName(organization.display_name);
       setRole(membership.role);
@@ -82,7 +165,7 @@ export default function Home() {
                   Revenue
                 </p>
                 <p className="mt-2 text-2xl font-bold">
-                  MVR 0.00
+                  MVR {revenue.toFixed(2)}
                 </p>
               </div>
 
@@ -91,7 +174,7 @@ export default function Home() {
                   Expenses
                 </p>
                 <p className="mt-2 text-2xl font-bold">
-                  MVR 0.00
+                  MVR {expenses.toFixed(2)}
                 </p>
               </div>
 
@@ -100,7 +183,7 @@ export default function Home() {
                   GST Payable
                 </p>
                 <p className="mt-2 text-2xl font-bold">
-                  MVR 0.00
+                  MVR {gstPayable.toFixed(2)}
                 </p>
               </div>
 
@@ -109,7 +192,7 @@ export default function Home() {
                   Active Projects
                 </p>
                 <p className="mt-2 text-2xl font-bold">
-                  0
+                  {activeProjects}
                 </p>
               </div>
             </div>
@@ -121,17 +204,40 @@ export default function Home() {
                 </h2>
 
                 <div className="mt-4 grid gap-3">
-                  <button className="rounded-xl bg-white p-3 font-semibold text-slate-950">
+                  <a
+                    href="/transactions/income"
+                    className="rounded-xl bg-white p-3 text-center font-semibold text-slate-950"
+                  >
                     Add Income
-                  </button>
+                  </a>
 
-                  <button className="rounded-xl bg-slate-800 p-3 font-semibold">
+                  <a
+                    href="/transactions/expense"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
                     Add Expense
-                  </button>
+                  </a>
 
-                  <button className="rounded-xl bg-slate-800 p-3 font-semibold">
+                  <a
+                    href="/projects/new"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
                     Add Project
-                  </button>
+                  </a>
+
+                  <a
+                    href="/customers/new"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
+                    Add Customer
+                  </a>
+
+                  <a
+                    href="/suppliers/new"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
+                    Add Supplier
+                  </a>
 
                   <button className="rounded-xl bg-slate-800 p-3 font-semibold">
                     Upload Receipt
