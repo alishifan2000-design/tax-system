@@ -38,6 +38,7 @@ export default function LoginPage() {
     }
 
     setMessage("Signed in successfully.");
+    window.location.href = "/";
   }
 
   return (

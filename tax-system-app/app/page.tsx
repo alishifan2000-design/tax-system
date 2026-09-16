@@ -155,7 +155,20 @@ export default function Home() {
 
         {message ? (
           <div className="rounded-2xl bg-slate-900 p-5">
-            <p className="text-slate-300">{message}</p>
+            {message === "You are not signed in." ? (
+              <div>
+                <p className="text-slate-300">You are not signed in.</p>
+
+                <a
+                  href="/login"
+                  className="mt-4 inline-block rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
+                >
+                  Sign In
+                </a>
+              </div>
+            ) : (
+              <p className="text-slate-300">{message}</p>
+            )}
           </div>
         ) : (
           <>
@@ -219,10 +232,24 @@ export default function Home() {
                   </a>
 
                   <a
+                    href="/transactions"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
+                    View Transactions
+                  </a>
+
+                  <a
                     href="/projects/new"
                     className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
                   >
                     Add Project
+                  </a>
+
+                  <a
+                    href="/projects"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
+                    View Projects
                   </a>
 
                   <a
@@ -233,10 +260,24 @@ export default function Home() {
                   </a>
 
                   <a
+                    href="/customers"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
+                    View Customers
+                  </a>
+
+                  <a
                     href="/suppliers/new"
                     className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
                   >
                     Add Supplier
+                  </a>
+
+                  <a
+                    href="/suppliers"
+                    className="rounded-xl bg-slate-800 p-3 text-center font-semibold"
+                  >
+                    View Suppliers
                   </a>
 
                   <button className="rounded-xl bg-slate-800 p-3 font-semibold">
