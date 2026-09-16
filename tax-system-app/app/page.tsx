@@ -11,6 +11,8 @@ export default function Home() {
   const [revenue, setRevenue] = useState(0);
   const [expenses, setExpenses] = useState(0);
   const [gstPayable, setGstPayable] = useState(0);
+  const [currentPeriod, setCurrentPeriod] = useState("Not set");
+  const [gstStatus, setGstStatus] = useState("Not calculated");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -123,6 +125,36 @@ export default function Home() {
           ) ?? 0;
 
       setGstPayable(outputGst - inputGst);
+
+      const netGst = outputGst - inputGst;
+
+      if (netGst > 0) {
+        setGstStatus(`Payable: MVR ${netGst.toFixed(2)}`);
+      } else if (netGst < 0) {
+        setGstStatus(`Credit: MVR ${Math.abs(netGst).toFixed(2)}`);
+      } else {
+        setGstStatus("MVR 0.00");
+      }
+
+      const { data: taxPeriod, error: taxPeriodError } = await supabase
+        .from("tax_periods")
+        .select("tax_type, period_start, period_end, status")
+        .eq("organization_id", membership.organization_id)
+        .eq("status", "open")
+        .order("period_start", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (taxPeriodError) {
+        setMessage(taxPeriodError.message);
+        return;
+      }
+
+      if (taxPeriod) {
+        setCurrentPeriod(
+          `${taxPeriod.tax_type}: ${taxPeriod.period_start} to ${taxPeriod.period_end}`
+        );
+      }
 
       setOrganizationName(organization.display_name);
       setRole(membership.role);
@@ -294,7 +326,7 @@ export default function Home() {
                 <div className="mt-4 space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-400">GST</span>
-                    <span>Not calculated</span>
+                    <span>{gstStatus}</span>
                   </div>
 
                   <div className="flex justify-between">
@@ -309,7 +341,7 @@ export default function Home() {
 
                   <div className="flex justify-between">
                     <span className="text-slate-400">Current Period</span>
-                    <span>Not set</span>
+                    <span>{currentPeriod}</span>
                   </div>
                 </div>
               </div>
