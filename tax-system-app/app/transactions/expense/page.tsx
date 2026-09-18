@@ -14,8 +14,13 @@ export default function AddExpensePage() {
   const [category, setCategory] = useState("");
   const [amountExclGst, setAmountExclGst] = useState("");
   const [gstRate, setGstRate] = useState("8");
+  const [nwtApplicable, setNwtApplicable] = useState(false);
+  const [nwtRate, setNwtRate] = useState("");
+  const [nwtAmount, setNwtAmount] = useState("");
+  const [nwtPaymentType, setNwtPaymentType] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("paid");
   const [message, setMessage] = useState("");
+
 
   useEffect(() => {
     async function loadData() {
@@ -77,6 +82,10 @@ export default function AddExpensePage() {
 
     const baseAmount = Number(amountExclGst || 0);
     const rate = Number(gstRate || 0);
+    const calculatedNwtAmount =
+      nwtApplicable && nwtRate
+        ? baseAmount * (Number(nwtRate) / 100)
+        : 0;
 
     const { error } = await supabase.from("transactions").insert([
       {
@@ -91,6 +100,10 @@ export default function AddExpensePage() {
         currency: "MVR",
         amount_excl_gst: baseAmount,
         gst_rate: rate,
+        nwt_applicable: nwtApplicable,
+        nwt_rate: nwtRate ? Number(nwtRate) : null,
+        nwt_amount: nwtApplicable ? calculatedNwtAmount : null,
+        nwt_payment_type: nwtPaymentType || null,
         payment_status: paymentStatus,
         created_by: user.id,
       },
@@ -145,6 +158,50 @@ export default function AddExpensePage() {
             </option>
           ))}
         </select>
+
+        <label className="mt-4 flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={nwtApplicable}
+            onChange={(e) => setNwtApplicable(e.target.checked)}
+          />
+          NWT Applicable
+        </label>
+
+        {nwtApplicable && (
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="block text-sm">NWT Payment Type</label>
+              <input
+                type="text"
+                value={nwtPaymentType}
+                onChange={(e) => setNwtPaymentType(e.target.value)}
+                className="mt-2 w-full rounded-xl bg-slate-800 p-3"
+                placeholder="e.g. Contractor payment"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm">NWT Rate (%)</label>
+              <input
+                type="number"
+                value={nwtRate}
+                onChange={(e) => setNwtRate(e.target.value)}
+                className="mt-2 w-full rounded-xl bg-slate-800 p-3"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm">NWT Amount (MVR)</label>
+              <input
+                type="number"
+                value={nwtAmount}
+                onChange={(e) => setNwtAmount(e.target.value)}
+                className="mt-2 w-full rounded-xl bg-slate-800 p-3"
+              />
+            </div>
+          </div>
+        )}
 
         <label className="mt-4 block text-sm">Reference No.</label>
         <input

@@ -14,6 +14,10 @@ export default function Home() {
   const [currentPeriod, setCurrentPeriod] = useState("Not set");
   const [gstStatus, setGstStatus] = useState("Not calculated");
   const [ewtStatus, setEwtStatus] = useState("Not calculated");
+  const [nwtStatus, setNwtStatus] = useState("Not calculated");
+  const [gstOpenPeriod, setGstOpenPeriod] = useState("Not set");
+  const [ewtOpenPeriod, setEwtOpenPeriod] = useState("Not set");
+  const [nwtOpenPeriod, setNwtOpenPeriod] = useState("Not set");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -114,6 +118,12 @@ export default function Home() {
         return;
       }
 
+      if (gstPeriod) {
+        setGstOpenPeriod(
+          `${gstPeriod.period_start} to ${gstPeriod.period_end}`
+        );
+      }
+
       const { data: gstTransactions, error: gstError } = await supabase
         .from("transactions")
         .select("transaction_type, gst_amount, transaction_date")
@@ -183,6 +193,12 @@ export default function Home() {
         return;
       }
 
+      if (ewtPeriod) {
+        setEwtOpenPeriod(
+          `${ewtPeriod.period_start} to ${ewtPeriod.period_end}`
+        );
+      }
+
       const { data: payrollRows, error: payrollError } = await supabase
         .from("employee_payroll")
         .select("ewt_amount, period_month")
@@ -217,6 +233,27 @@ export default function Home() {
         );
       } else {
         setEwtStatus(`${ewtPeriodLabel} — No EWT payable`);
+      }
+
+      const { data: nwtPeriod, error: nwtPeriodError } = await supabase
+        .from("tax_periods")
+        .select("period_start, period_end")
+        .eq("organization_id", membership.organization_id)
+        .eq("tax_type", "NWT")
+        .eq("status", "open")
+        .order("period_start", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (nwtPeriodError) {
+        setMessage(nwtPeriodError.message);
+        return;
+      }
+
+      if (nwtPeriod) {
+        setNwtOpenPeriod(
+          `${nwtPeriod.period_start} to ${nwtPeriod.period_end}`
+        );
       }
 
       const { data: taxPeriod, error: taxPeriodError } = await supabase
@@ -419,12 +456,22 @@ export default function Home() {
 
                   <div className="flex justify-between">
                     <span className="text-slate-400">NWT</span>
-                    <span>Not calculated</span>
+                    <span>{nwtStatus}</span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Current Period</span>
-                    <span>{currentPeriod}</span>
+                    <span className="text-slate-400">GST Open Period</span>
+                    <span>{gstOpenPeriod}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">EWT Open Period</span>
+                    <span>{ewtOpenPeriod}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">NWT Open Period</span>
+                    <span>{nwtOpenPeriod}</span>
                   </div>
                 </div>
               </div>
