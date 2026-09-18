@@ -124,16 +124,16 @@ export default function Home() {
             0
           ) ?? 0;
 
-      setGstPayable(outputGst - inputGst);
-
       const netGst = outputGst - inputGst;
+
+      setGstPayable(netGst);
 
       if (netGst > 0) {
         setGstStatus(`Payable: MVR ${netGst.toFixed(2)}`);
       } else if (netGst < 0) {
         setGstStatus(`Credit: MVR ${Math.abs(netGst).toFixed(2)}`);
       } else {
-        setGstStatus("MVR 0.00");
+        setGstStatus("No GST payable");
       }
 
       const { data: taxPeriod, error: taxPeriodError } = await supabase
