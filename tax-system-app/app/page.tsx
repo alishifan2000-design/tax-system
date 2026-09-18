@@ -13,6 +13,7 @@ export default function Home() {
   const [gstPayable, setGstPayable] = useState(0);
   const [currentPeriod, setCurrentPeriod] = useState("Not set");
   const [gstStatus, setGstStatus] = useState("Not calculated");
+  const [ewtStatus, setEwtStatus] = useState("Not calculated");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -98,10 +99,27 @@ export default function Home() {
 
       setExpenses(totalExpenses);
 
+      const { data: gstPeriod, error: gstPeriodError } = await supabase
+        .from("tax_periods")
+        .select("period_start, period_end")
+        .eq("organization_id", membership.organization_id)
+        .eq("tax_type", "GST")
+        .eq("status", "open")
+        .order("period_start", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (gstPeriodError) {
+        setMessage(gstPeriodError.message);
+        return;
+      }
+
       const { data: gstTransactions, error: gstError } = await supabase
         .from("transactions")
-        .select("transaction_type, gst_amount")
-        .eq("organization_id", membership.organization_id);
+        .select("transaction_type, gst_amount, transaction_date")
+        .eq("organization_id", membership.organization_id)
+        .gte("transaction_date", gstPeriod?.period_start ?? "1900-01-01")
+        .lte("transaction_date", gstPeriod?.period_end ?? "2999-12-31");
 
       if (gstError) {
         setMessage(gstError.message);
@@ -124,16 +142,81 @@ export default function Home() {
             0
           ) ?? 0;
 
+      const gstPeriodLabel = gstPeriod
+        ? new Date(`${gstPeriod.period_start}T00:00:00`).toLocaleDateString(
+          "en-GB",
+          {
+            month: "short",
+            year: "numeric",
+          }
+        )
+        : "No open period";
+
       const netGst = outputGst - inputGst;
 
       setGstPayable(netGst);
 
       if (netGst > 0) {
-        setGstStatus(`Payable: MVR ${netGst.toFixed(2)}`);
+        setGstStatus(
+          `${gstPeriodLabel} — Payable: MVR ${netGst.toFixed(2)}`
+        );
       } else if (netGst < 0) {
-        setGstStatus(`Credit: MVR ${Math.abs(netGst).toFixed(2)}`);
+        setGstStatus(
+          `${gstPeriodLabel} — Credit: MVR ${Math.abs(netGst).toFixed(2)}`
+        );
       } else {
-        setGstStatus("No GST payable");
+        setGstStatus(`${gstPeriodLabel} — No GST payable`);
+      }
+
+      const { data: ewtPeriod, error: ewtPeriodError } = await supabase
+        .from("tax_periods")
+        .select("period_start, period_end")
+        .eq("organization_id", membership.organization_id)
+        .eq("tax_type", "EWT")
+        .eq("status", "open")
+        .order("period_start", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (ewtPeriodError) {
+        setMessage(ewtPeriodError.message);
+        return;
+      }
+
+      const { data: payrollRows, error: payrollError } = await supabase
+        .from("employee_payroll")
+        .select("ewt_amount, period_month")
+        .eq("organization_id", membership.organization_id)
+        .gte("period_month", ewtPeriod?.period_start ?? "1900-01-01")
+        .lte("period_month", ewtPeriod?.period_end ?? "2999-12-31");
+
+      if (payrollError) {
+        setMessage(payrollError.message);
+        return;
+      }
+
+      const totalEwt =
+        payrollRows?.reduce(
+          (sum, row) => sum + Number(row.ewt_amount || 0),
+          0
+        ) ?? 0;
+
+      const ewtPeriodLabel = ewtPeriod
+        ? new Date(`${ewtPeriod.period_start}T00:00:00`).toLocaleDateString(
+          "en-GB",
+          {
+            month: "short",
+            year: "numeric",
+          }
+        )
+        : "No open period";
+
+      if (totalEwt > 0) {
+        setEwtStatus(
+          `${ewtPeriodLabel} — Payable: MVR ${totalEwt.toFixed(2)}`
+        );
+      } else {
+        setEwtStatus(`${ewtPeriodLabel} — No EWT payable`);
       }
 
       const { data: taxPeriod, error: taxPeriodError } = await supabase
@@ -331,7 +414,7 @@ export default function Home() {
 
                   <div className="flex justify-between">
                     <span className="text-slate-400">EWT</span>
-                    <span>Not calculated</span>
+                    <span>{ewtStatus}</span>
                   </div>
 
                   <div className="flex justify-between">

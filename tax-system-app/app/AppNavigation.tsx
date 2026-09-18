@@ -58,6 +58,13 @@ export default function AppNavigation() {
                         Transactions
                     </a>
 
+                    <a
+                        href="/payroll"
+                        className="rounded-lg bg-slate-800 px-3 py-2"
+                    >
+                        Payroll
+                    </a>
+
                     <a href="/customers" className="rounded-lg bg-slate-800 px-3 py-2">
                         Customers
                     </a>
