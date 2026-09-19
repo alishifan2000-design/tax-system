@@ -80,6 +80,13 @@ export default function AppNavigation() {
                         Tax Periods
                     </a>
 
+                    <a
+                        href="/tax-rates"
+                        className="rounded-lg bg-slate-800 px-3 py-2"
+                    >
+                        Tax Rates
+                    </a>
+
                     <SignOutButton />
                 </nav>
             </div>

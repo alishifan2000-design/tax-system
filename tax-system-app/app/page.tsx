@@ -256,6 +256,43 @@ export default function Home() {
         );
       }
 
+      const { data: nwtTransactions, error: nwtError } = await supabase
+        .from("transactions")
+        .select("nwt_amount, transaction_date")
+        .eq("organization_id", membership.organization_id)
+        .eq("nwt_applicable", true)
+        .gte("transaction_date", nwtPeriod?.period_start ?? "1900-01-01")
+        .lte("transaction_date", nwtPeriod?.period_end ?? "2999-12-31");
+
+      if (nwtError) {
+        setMessage(nwtError.message);
+        return;
+      }
+
+      const totalNwt =
+        nwtTransactions?.reduce(
+          (sum, row) => sum + Number(row.nwt_amount || 0),
+          0
+        ) ?? 0;
+
+      const nwtPeriodLabel = nwtPeriod
+        ? new Date(`${nwtPeriod.period_start}T00:00:00`).toLocaleDateString(
+          "en-GB",
+          {
+            month: "short",
+            year: "numeric",
+          }
+        )
+        : "No open period";
+
+      if (totalNwt > 0) {
+        setNwtStatus(
+          `${nwtPeriodLabel} — Payable: MVR ${totalNwt.toFixed(2)}`
+        );
+      } else {
+        setNwtStatus(`${nwtPeriodLabel} — No NWT payable`);
+      }
+
       const { data: taxPeriod, error: taxPeriodError } = await supabase
         .from("tax_periods")
         .select("tax_type, period_start, period_end, status")

@@ -16,7 +16,6 @@ export default function AddExpensePage() {
   const [gstRate, setGstRate] = useState("8");
   const [nwtApplicable, setNwtApplicable] = useState(false);
   const [nwtRate, setNwtRate] = useState("");
-  const [nwtAmount, setNwtAmount] = useState("");
   const [nwtPaymentType, setNwtPaymentType] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("paid");
   const [message, setMessage] = useState("");
@@ -82,6 +81,13 @@ export default function AddExpensePage() {
 
     const baseAmount = Number(amountExclGst || 0);
     const rate = Number(gstRate || 0);
+    if (nwtApplicable && !nwtRate) {
+      setMessage(
+        "No valid NWT rate was found for this payment type and transaction date. Please check the Tax Rates table or choose a valid transaction date."
+      );
+      return;
+    }
+
     const calculatedNwtAmount =
       nwtApplicable && nwtRate
         ? baseAmount * (Number(nwtRate) / 100)
@@ -172,13 +178,67 @@ export default function AddExpensePage() {
           <div className="mt-4 space-y-4">
             <div>
               <label className="block text-sm">NWT Payment Type</label>
-              <input
-                type="text"
+              <select
                 value={nwtPaymentType}
-                onChange={(e) => setNwtPaymentType(e.target.value)}
+                onChange={async (e) => {
+                  const selectedPaymentType = e.target.value;
+
+                  setNwtPaymentType(selectedPaymentType);
+
+                  if (e.target.value) {
+                    const {
+                      data: { user },
+                    } = await supabase.auth.getUser();
+
+                    if (!user) {
+                      setNwtRate("");
+                      return;
+                    }
+
+                    const { data: membership } = await supabase
+                      .from("organization_users")
+                      .select("organization_id")
+                      .eq("user_id", user.id)
+                      .single();
+
+                    if (!membership) {
+                      setNwtRate("");
+                      return;
+                    }
+
+                    const { data: taxRate } = await supabase
+                      .from("tax_rates")
+                      .select("rate")
+                      .eq("organization_id", membership.organization_id)
+                      .eq("tax_type", "NWT")
+                      .eq("payment_type", selectedPaymentType)
+                      .lte("effective_from", transactionDate || "2999-12-31")
+                      .or(
+                        `effective_to.is.null,effective_to.gte.${transactionDate || "1900-01-01"}`
+                      )
+                      .order("effective_from", { ascending: false })
+                      .limit(1)
+                      .maybeSingle();
+
+                    setNwtRate(taxRate ? String(taxRate.rate) : "");
+                  } else {
+                    setNwtRate("");
+                  }
+                }}
                 className="mt-2 w-full rounded-xl bg-slate-800 p-3"
-                placeholder="e.g. Contractor payment"
-              />
+              >
+                <option value="">Select payment type</option>
+                <option value="rent">Rent of immovable property</option>
+                <option value="royalty">Royalty</option>
+                <option value="interest">Interest</option>
+                <option value="dividends">Dividends</option>
+                <option value="technical_services">Fees for technical services</option>
+                <option value="commission">Commission for services in Maldives</option>
+                <option value="entertainer">Public entertainer payment</option>
+                <option value="research_development">Research and development</option>
+                <option value="insurance">Insurance premium</option>
+                <option value="contractor">Contractor payment</option>
+              </select>
             </div>
 
             <div>
@@ -186,19 +246,20 @@ export default function AddExpensePage() {
               <input
                 type="number"
                 value={nwtRate}
-                onChange={(e) => setNwtRate(e.target.value)}
+                readOnly
                 className="mt-2 w-full rounded-xl bg-slate-800 p-3"
               />
             </div>
 
             <div>
-              <label className="block text-sm">NWT Amount (MVR)</label>
-              <input
-                type="number"
-                value={nwtAmount}
-                onChange={(e) => setNwtAmount(e.target.value)}
-                className="mt-2 w-full rounded-xl bg-slate-800 p-3"
-              />
+              <label className="block text-sm">Calculated NWT Amount (MVR)</label>
+              <div className="mt-2 w-full rounded-xl bg-slate-800 p-3 text-slate-300">
+                MVR{" "}
+                {(
+                  Number(amountExclGst || 0) *
+                  (Number(nwtRate || 0) / 100)
+                ).toFixed(2)}
+              </div>
             </div>
           </div>
         )}
