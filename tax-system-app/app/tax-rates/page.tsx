@@ -6,6 +6,27 @@ import { supabase } from "@/lib/supabase";
 export default function TaxRatesPage() {
     const [rates, setRates] = useState<any[]>([]);
     const [message, setMessage] = useState("Loading tax rates...");
+    const [taxTypeFilter, setTaxTypeFilter] = useState("ALL");
+    const [statusFilter, setStatusFilter] = useState("ALL");
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const filteredRates = rates.filter((rate) => {
+        const matchesTaxType =
+            taxTypeFilter === "ALL" ||
+            rate.tax_type === taxTypeFilter;
+
+        const matchesStatus =
+            statusFilter === "ALL" ||
+            (statusFilter === "CURRENT" && !rate.effective_to) ||
+            (statusFilter === "HISTORICAL" && rate.effective_to);
+
+        const matchesSearch =
+            rate.payment_type
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+
+        return matchesTaxType && matchesStatus && matchesSearch;
+    });
 
     useEffect(() => {
         async function loadRates() {
@@ -73,6 +94,60 @@ export default function TaxRatesPage() {
                     </p>
                 )}
 
+                <div className="mb-4">
+                    <label className="mr-3 text-sm text-slate-400">
+                        Filter by Tax Type
+                    </label>
+
+                    <select
+                        value={taxTypeFilter}
+                        onChange={(e) => setTaxTypeFilter(e.target.value)}
+                        className="rounded-lg bg-slate-800 px-3 py-2"
+                    >
+                        <option value="ALL">All</option>
+                        <option value="NWT">NWT</option>
+                        <option value="GST">GST</option>
+                        <option value="EWT">EWT</option>
+                    </select>
+
+                    <label className="ml-4 mr-3 text-sm text-slate-400">
+                        Status
+                    </label>
+
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="rounded-lg bg-slate-800 px-3 py-2"
+                    >
+                        <option value="ALL">All</option>
+                        <option value="CURRENT">Current</option>
+                        <option value="HISTORICAL">Historical</option>
+                    </select>
+
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search payment type..."
+                        className="ml-4 rounded-lg bg-slate-800 px-3 py-2"
+                    />
+
+                    <button
+                        onClick={() => {
+                            setTaxTypeFilter("ALL");
+                            setStatusFilter("ALL");
+                            setSearchTerm("");
+                        }}
+                        className="ml-4 rounded-lg bg-slate-700 px-3 py-2 text-sm"
+                    >
+                        Clear Filters
+                    </button>
+                </div>
+
+                <p className="mb-3 text-sm text-slate-400">
+                    Showing {filteredRates.length} tax rate(s)
+                </p>
+
                 <div className="overflow-x-auto rounded-2xl bg-slate-900">
                     <table className="w-full text-left text-sm">
                         <thead className="border-b border-slate-800 text-slate-400">
@@ -87,47 +162,56 @@ export default function TaxRatesPage() {
                         </thead>
 
                         <tbody>
-                            {rates.map((rate) => (
-                                <tr
-                                    key={rate.id}
-                                    className="border-b border-slate-800 last:border-0"
-                                >
-                                    <td className="p-4">
-                                        {rate.tax_type}
-                                    </td>
+                            {filteredRates.map((rate) => (
+                                    <tr
+                                        key={rate.id}
+                                        className="border-b border-slate-800 last:border-0"
+                                    >
+                                        <td className="p-4">
+                                            {rate.tax_type}
+                                        </td>
 
-                                    <td className="p-4">
-                                        {rate.payment_type
-                                            .replaceAll("_", " ")
-                                            .replace(/\b\w/g, (char: string) => char.toUpperCase())}
-                                    </td>
+                                        <td className="p-4">
+                                            {rate.payment_type
+                                                .replaceAll("_", " ")
+                                                .replace(/\b\w/g, (char: string) => char.toUpperCase())}
+                                        </td>
 
-                                    <td className="p-4">
-                                        {Number(rate.rate || 0).toFixed(2)}%
-                                    </td>
+                                        <td className="p-4">
+                                            {Number(rate.rate || 0).toFixed(2)}%
+                                        </td>
 
-                                    <td className="p-4">
-                                        {rate.effective_from}
-                                    </td>
+                                        <td className="p-4">
+                                            {rate.effective_from}
+                                        </td>
 
-                                    <td className="p-4">
-                                        {rate.effective_to ?? "Current"}
-                                    </td>
+                                        <td className="p-4">
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-xs font-semibold ${rate.effective_to
+                                                    ? "bg-slate-800 text-slate-300"
+                                                    : "bg-emerald-900/40 text-emerald-300"
+                                                    }`}
+                                            >
+                                                {rate.effective_to
+                                                    ? `Expired: ${rate.effective_to}`
+                                                    : "Current"}
+                                            </span>
+                                        </td>
 
-                                    <td className="p-4">
-                                      <a
-                                        href={`/tax-rates/${rate.id}/edit`}
-                                        className="text-blue-400 hover:underline"
-                                      >
-                                        Edit
-                                      </a>
-                                    </td>
-                                </tr>
-                            ))}
+                                        <td className="p-4">
+                                            <a
+                                                href={`/tax-rates/${rate.id}/edit`}
+                                                className="text-blue-400 hover:underline"
+                                            >
+                                                Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                 </div>
             </div>
-        </main>
+        </main >
     );
 }
