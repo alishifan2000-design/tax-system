@@ -18,6 +18,9 @@ export default function Home() {
   const [gstOpenPeriod, setGstOpenPeriod] = useState("Not set");
   const [ewtOpenPeriod, setEwtOpenPeriod] = useState("Not set");
   const [nwtOpenPeriod, setNwtOpenPeriod] = useState("Not set");
+  const [gstDueDate, setGstDueDate] = useState("Not set");
+  const [ewtDueDate, setEwtDueDate] = useState("Not set");
+  const [nwtDueDate, setNwtDueDate] = useState("Not set");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -105,7 +108,7 @@ export default function Home() {
 
       const { data: gstPeriod, error: gstPeriodError } = await supabase
         .from("tax_periods")
-        .select("period_start, period_end")
+        .select("period_start, period_end, due_date")
         .eq("organization_id", membership.organization_id)
         .eq("tax_type", "GST")
         .eq("status", "open")
@@ -122,6 +125,8 @@ export default function Home() {
         setGstOpenPeriod(
           `${gstPeriod.period_start} to ${gstPeriod.period_end}`
         );
+
+        setGstDueDate(gstPeriod.due_date ?? "Not set");
       }
 
       const { data: gstTransactions, error: gstError } = await supabase
@@ -180,7 +185,7 @@ export default function Home() {
 
       const { data: ewtPeriod, error: ewtPeriodError } = await supabase
         .from("tax_periods")
-        .select("period_start, period_end")
+        .select("period_start, period_end, due_date")
         .eq("organization_id", membership.organization_id)
         .eq("tax_type", "EWT")
         .eq("status", "open")
@@ -197,6 +202,8 @@ export default function Home() {
         setEwtOpenPeriod(
           `${ewtPeriod.period_start} to ${ewtPeriod.period_end}`
         );
+
+        setEwtDueDate(ewtPeriod.due_date ?? "Not set");
       }
 
       const { data: payrollRows, error: payrollError } = await supabase
@@ -237,7 +244,7 @@ export default function Home() {
 
       const { data: nwtPeriod, error: nwtPeriodError } = await supabase
         .from("tax_periods")
-        .select("period_start, period_end")
+        .select("period_start, period_end, due_date")
         .eq("organization_id", membership.organization_id)
         .eq("tax_type", "NWT")
         .eq("status", "open")
@@ -254,6 +261,8 @@ export default function Home() {
         setNwtOpenPeriod(
           `${nwtPeriod.period_start} to ${nwtPeriod.period_end}`
         );
+
+        setNwtDueDate(nwtPeriod.due_date ?? "Not set");
       }
 
       const { data: nwtTransactions, error: nwtError } = await supabase
@@ -496,19 +505,43 @@ export default function Home() {
                     <span>{nwtStatus}</span>
                   </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">GST Open Period</span>
-                    <span>{gstOpenPeriod}</span>
-                  </div>
+                  <div className="mt-5 border-t border-slate-800 pt-4">
+                    <p className="mb-3 text-sm font-semibold text-slate-300">
+                      Open Tax Periods
+                    </p>
 
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">EWT Open Period</span>
-                    <span>{ewtOpenPeriod}</span>
-                  </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-400">GST</span>
 
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">NWT Open Period</span>
-                    <span>{nwtOpenPeriod}</span>
+                      <div className="text-right">
+                        <div>{gstOpenPeriod}</div>
+                        <div className="text-xs text-slate-500">
+                          Due: {gstDueDate}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-400">EWT</span>
+
+                      <div className="text-right">
+                        <div>{ewtOpenPeriod}</div>
+                        <div className="text-xs text-slate-500">
+                          Due: {ewtDueDate}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between gap-4">
+                      <span className="text-slate-400">NWT</span>
+
+                      <div className="text-right">
+                        <div>{nwtOpenPeriod}</div>
+                        <div className="text-xs text-slate-500">
+                          Due: {nwtDueDate}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
