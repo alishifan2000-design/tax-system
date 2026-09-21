@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+function isOverdue(dueDate: string) {
+  if (!dueDate || dueDate === "Not set") return false;
+
+  const today = new Date();
+  const due = new Date(`${dueDate}T23:59:59`);
+
+  return due < today;
+}
+
 export default function Home() {
   const [organizationName, setOrganizationName] = useState("");
   const [role, setRole] = useState("");
@@ -515,8 +524,14 @@ export default function Home() {
 
                       <div className="text-right">
                         <div>{gstOpenPeriod}</div>
-                        <div className="text-xs text-slate-500">
+                        <div
+                          className={`text-xs ${isOverdue(gstDueDate)
+                            ? "font-semibold text-red-400"
+                            : "text-slate-500"
+                            }`}
+                        >
                           Due: {gstDueDate}
+                          {isOverdue(gstDueDate) ? " — Overdue" : ""}
                         </div>
                       </div>
                     </div>
@@ -526,8 +541,14 @@ export default function Home() {
 
                       <div className="text-right">
                         <div>{ewtOpenPeriod}</div>
-                        <div className="text-xs text-slate-500">
+                        <div
+                          className={`text-xs ${isOverdue(ewtDueDate)
+                            ? "font-semibold text-red-400"
+                            : "text-slate-500"
+                            }`}
+                        >
                           Due: {ewtDueDate}
+                          {isOverdue(ewtDueDate) ? " — Overdue" : ""}
                         </div>
                       </div>
                     </div>
@@ -537,8 +558,14 @@ export default function Home() {
 
                       <div className="text-right">
                         <div>{nwtOpenPeriod}</div>
-                        <div className="text-xs text-slate-500">
+                        <div
+                          className={`text-xs ${isOverdue(nwtDueDate)
+                              ? "font-semibold text-red-400"
+                              : "text-slate-500"
+                            }`}
+                        >
                           Due: {nwtDueDate}
+                          {isOverdue(nwtDueDate) ? " — Overdue" : ""}
                         </div>
                       </div>
                     </div>
