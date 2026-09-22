@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 export default function TaxPeriodsPage() {
     const [periods, setPeriods] = useState<any[]>([]);
     const [message, setMessage] = useState("Loading tax periods...");
+    const [role, setRole] = useState("");
 
     useEffect(() => {
         async function loadTaxPeriods() {
@@ -20,7 +21,7 @@ export default function TaxPeriodsPage() {
 
             const { data: membership, error: membershipError } = await supabase
                 .from("organization_users")
-                .select("organization_id")
+                .select("organization_id, role")
                 .eq("user_id", user.id)
                 .single();
 
@@ -28,6 +29,8 @@ export default function TaxPeriodsPage() {
                 setMessage(membershipError?.message || "Organization not found.");
                 return;
             }
+
+            setRole(membership.role ?? "");
 
             const { data, error } = await supabase
                 .from("tax_periods")
@@ -90,9 +93,20 @@ export default function TaxPeriodsPage() {
                                         </h2>
                                     </div>
 
-                                    <span className="rounded-full bg-slate-800 px-3 py-1 text-xs">
-                                        {period.status}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs">
+                                            {period.status}
+                                        </span>
+
+                                        {["admin", "senior"].includes(role.toLowerCase()) && (
+                                            <a
+                                                href={`/tax-periods/${period.id}/edit`}
+                                                className="rounded-lg bg-slate-800 px-3 py-2 text-sm hover:bg-slate-700"
+                                            >
+                                                Edit
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="mt-4 space-y-2 text-sm text-slate-300">
