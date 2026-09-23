@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDateTime } from "@/lib/dateTime";
 
 export default function MyTaxPeriodRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -124,14 +125,16 @@ export default function MyTaxPeriodRequestsPage() {
                   <span className="text-slate-400">
                     Submitted:
                   </span>{" "}
-                  {request.created_at}
+                  {formatMaldivesDateTime(request.created_at)}
                 </p>
 
                 <p>
                   <span className="text-slate-400">
                     Reviewed:
                   </span>{" "}
-                  {request.reviewed_at ?? "Not reviewed yet"}
+                  {request.reviewed_at
+                    ? formatMaldivesDateTime(request.reviewed_at)
+                    : "Not reviewed yet"}
                 </p>
                 <p>
                   <span className="text-slate-400">

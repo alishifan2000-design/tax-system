@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate, formatMaldivesDateTime } from "@/lib/dateTime";
 
 export default function TaxPeriodsPage() {
     const [periods, setPeriods] = useState<any[]>([]);
@@ -89,7 +90,7 @@ export default function TaxPeriodsPage() {
                                         </p>
 
                                         <h2 className="mt-1 text-xl font-semibold">
-                                            {period.period_start} to {period.period_end}
+                                            {formatMaldivesDate(period.period_start)} to {formatMaldivesDate(period.period_end)}
                                         </h2>
                                     </div>
 
@@ -119,8 +120,18 @@ export default function TaxPeriodsPage() {
                                 </div>
 
                                 <div className="mt-4 space-y-2 text-sm text-slate-300">
-                                    <p>Due Date: {period.due_date || "Not set"}</p>
-                                    <p>Filed At: {period.filed_at || "Not filed"}</p>
+                                    <p>
+                                        Due Date:{" "}
+                                        {period.due_date
+                                            ? formatMaldivesDate(period.due_date)
+                                            : "Not set"}
+                                    </p>
+                                    <p>
+                                        Filed At:{" "}
+                                        {period.filed_at
+                                            ? formatMaldivesDateTime(period.filed_at)
+                                            : "Not filed"}
+                                    </p>
                                     <p>
                                         Payment Reference:{" "}
                                         {period.payment_reference || "Not set"}

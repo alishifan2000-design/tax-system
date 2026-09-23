@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate, formatMaldivesDateTime } from "@/lib/dateTime";
 
 export default function ReviewTaxPeriodRequestPage() {
     const params = useParams();
@@ -188,7 +189,7 @@ export default function ReviewTaxPeriodRequestPage() {
                 >
                     ←
                 </button>
-                
+
                 <p className="text-sm text-slate-400">TAX SYSTEM</p>
 
                 <h1 className="mt-2 text-3xl font-bold">
@@ -203,8 +204,8 @@ export default function ReviewTaxPeriodRequestPage() {
 
                     <p>
                         <span className="text-slate-400">Period:</span>{" "}
-                        {request.tax_periods?.period_start} to{" "}
-                        {request.tax_periods?.period_end}
+                        {formatMaldivesDate(request.tax_periods?.period_start)} to{" "}
+                        {formatMaldivesDate(request.tax_periods?.period_end)}
                     </p>
 
                     <p>
@@ -219,7 +220,7 @@ export default function ReviewTaxPeriodRequestPage() {
                     </pre>
 
                     <p className="text-xs text-slate-500">
-                        Submitted: {request.created_at}
+                        submitted: {formatMaldivesDateTime(request.created_at)}
                     </p>
                 </div>
 

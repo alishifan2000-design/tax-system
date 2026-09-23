@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate, formatMaldivesDateTime } from "@/lib/dateTime";
 
 export default function TaxPeriodRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -98,8 +99,8 @@ export default function TaxPeriodRequestsPage() {
                   </p>
 
                   <h2 className="mt-1 text-lg font-semibold">
-                    {request.tax_periods?.period_start} to{" "}
-                    {request.tax_periods?.period_end}
+                    {formatMaldivesDate(request.tax_periods?.period_start)} to{" "}
+                    {formatMaldivesDate(request.tax_periods?.period_end)}
                   </h2>
                 </div>
 
@@ -129,20 +130,18 @@ export default function TaxPeriodRequestsPage() {
                 </pre>
 
                 <p className="text-xs text-slate-500">
-                  Submitted: {request.created_at}
+                  Submitted: {formatMaldivesDateTime(request.created_at)}
                 </p>
               </div>
 
-              {request.status === "pending" && (
-                <div className="mt-4">
-                  <a
-                    href={`/tax-period-requests/${request.id}`}
-                    className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950"
-                  >
-                    Review Request
-                  </a>
-                </div>
-              )}
+              <div className="mt-4">
+                <a
+                  href={`/tax-period-requests/${request.id}`}
+                  className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950"
+                >
+                  {request.status === "pending" ? "Review Request" : "View Request"}
+                </a>
+              </div>
             </div>
           ))}
         </div>
