@@ -1,4 +1,4 @@
-    "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 export default function MyTaxPeriodRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [message, setMessage] = useState("Loading requests...");
+  const [reviewerNames, setReviewerNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadRequests() {
@@ -25,6 +26,7 @@ export default function MyTaxPeriodRequestsPage() {
           requested_changes,
           reason,
           status,
+          reviewed_by,
           reviewed_at,
           created_at,
           tax_periods (
@@ -42,6 +44,26 @@ export default function MyTaxPeriodRequestsPage() {
       }
 
       setRequests(data ?? []);
+
+      const reviewerIds = (data ?? [])
+        .map((request) => request.reviewed_by)
+        .filter(Boolean);
+
+      if (reviewerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", reviewerIds);
+
+        const names: Record<string, string> = {};
+
+        profiles?.forEach((profile) => {
+          names[profile.id] = profile.full_name;
+        });
+
+        setReviewerNames(names);
+      }
+
       setMessage("");
     }
 
@@ -81,13 +103,12 @@ export default function MyTaxPeriodRequestsPage() {
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
-                    request.status === "approved"
-                      ? "bg-emerald-900/40 text-emerald-300"
-                      : request.status === "rejected"
+                  className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${request.status === "approved"
+                    ? "bg-emerald-900/40 text-emerald-300"
+                    : request.status === "rejected"
                       ? "bg-red-900/40 text-red-300"
                       : "bg-amber-900/40 text-amber-300"
-                  }`}
+                    }`}
                 >
                   {request.status}
                 </span>
@@ -111,6 +132,16 @@ export default function MyTaxPeriodRequestsPage() {
                     Reviewed:
                   </span>{" "}
                   {request.reviewed_at ?? "Not reviewed yet"}
+                </p>
+                <p>
+                  <span className="text-slate-400">
+                    Reviewed By:
+                  </span>{" "}
+                  {request.reviewed_by
+                    ? reviewerNames[request.reviewed_by]
+                      ? `${reviewerNames[request.reviewed_by]} (${request.reviewed_by.slice(0, 8)})`
+                      : request.reviewed_by.slice(0, 8)
+                    : "Not reviewed yet"}
                 </p>
               </div>
             </div>
