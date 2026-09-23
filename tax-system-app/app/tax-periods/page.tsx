@@ -106,6 +106,15 @@ export default function TaxPeriodsPage() {
                                                 Edit
                                             </a>
                                         )}
+
+                                        {!["admin", "senior"].includes(role.toLowerCase()) && (
+                                            <a
+                                                href={`/tax-periods/${period.id}/request-change`}
+                                                className="rounded-lg bg-slate-800 px-3 py-2 text-sm hover:bg-slate-700"
+                                            >
+                                                Request Change
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
 

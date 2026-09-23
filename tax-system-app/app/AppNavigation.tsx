@@ -7,6 +7,17 @@ import SignOutButton from "./SignOutButton";
 
 export default function AppNavigation() {
     const pathname = usePathname();
+
+    const navClass = (href: string) => {
+        const active =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+        return `rounded-lg px-3 py-2 ${active
+            ? "bg-white font-semibold text-slate-950"
+            : "bg-slate-800 text-white hover:bg-slate-700"
+            }`;
+    };
+
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
@@ -43,48 +54,43 @@ export default function AppNavigation() {
                 </a>
 
                 <nav className="flex w-full flex-wrap gap-2 text-sm sm:w-auto sm:flex-nowrap">
-                    <a href="/" className="rounded-lg bg-slate-800 px-3 py-2">
+                    <a href="/" className={navClass("/")}>
                         Dashboard
                     </a>
 
-                    <a href="/projects" className="rounded-lg bg-slate-800 px-3 py-2">
+                    <a href="/projects" className={navClass("/projects")}>
                         Projects
                     </a>
 
-                    <a
-                        href="/transactions"
-                        className="rounded-lg bg-slate-800 px-3 py-2"
-                    >
+                    <a href="/transactions" className={navClass("/transactions")}>
                         Transactions
                     </a>
 
-                    <a
-                        href="/payroll"
-                        className="rounded-lg bg-slate-800 px-3 py-2"
-                    >
+                    <a href="/payroll" className={navClass("/payroll")}>
                         Payroll
                     </a>
 
-                    <a href="/customers" className="rounded-lg bg-slate-800 px-3 py-2">
+                    <a href="/customers" className={navClass("/customers")}>
                         Customers
                     </a>
 
-                    <a href="/suppliers" className="rounded-lg bg-slate-800 px-3 py-2">
+                    <a href="/suppliers" className={navClass("/suppliers")}>
                         Suppliers
                     </a>
 
-                    <a
-                        href="/tax-periods"
-                        className="rounded-lg bg-slate-800 px-3 py-2"
-                    >
+                    <a href="/tax-periods" className={navClass("/tax-periods")}>
                         Tax Periods
                     </a>
 
-                    <a
-                        href="/tax-rates"
-                        className="rounded-lg bg-slate-800 px-3 py-2"
-                    >
+                    <a href="/tax-rates" className={navClass("/tax-rates")}>
                         Tax Rates
+                    </a>
+
+                    <a
+                        href="/my-tax-period-requests"
+                        className={navClass("/my-tax-period-requests")}
+                    >
+                        My Requests
                     </a>
 
                     <SignOutButton />

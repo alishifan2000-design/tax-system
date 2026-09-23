@@ -110,6 +110,13 @@ export default function EditTaxPeriodPage() {
     return (
         <main className="min-h-screen bg-slate-950 p-6 text-white">
             <div className="mx-auto max-w-xl rounded-3xl bg-slate-900 p-8">
+                <button
+                    onClick={() => window.history.back()}
+                    className="mb-4 text-xl text-slate-300 hover:text-white"
+                >
+                    ←
+                </button>
+                
                 <p className="text-sm text-slate-400">TAX SYSTEM</p>
 
                 <h1 className="mt-2 text-3xl font-bold">
