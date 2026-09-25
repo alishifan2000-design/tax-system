@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { formatMaldivesDateTime } from "@/lib/dateTime";
+import {
+  formatMaldivesDate,
+  formatMaldivesDateTime,
+} from "@/lib/dateTime";
 
 export default function MyTaxPeriodRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -98,8 +101,8 @@ export default function MyTaxPeriodRequestsPage() {
                   </p>
 
                   <h2 className="mt-1 text-lg font-semibold">
-                    {request.tax_periods?.period_start} to{" "}
-                    {request.tax_periods?.period_end}
+                    {formatMaldivesDate(request.tax_periods?.period_start)} to{" "}
+                    {formatMaldivesDate(request.tax_periods?.period_end)}
                   </h2>
                 </div>
 

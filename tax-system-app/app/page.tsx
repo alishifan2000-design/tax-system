@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate } from "@/lib/dateTime";
 
 function isOverdue(dueDate: string) {
   if (!dueDate || dueDate === "Not set") return false;
@@ -132,9 +133,10 @@ export default function Home() {
 
       if (gstPeriod) {
         setGstOpenPeriod(
-          `${gstPeriod.period_start} to ${gstPeriod.period_end}`
+          `${formatMaldivesDate(gstPeriod.period_start)} to ${formatMaldivesDate(
+            gstPeriod.period_end
+          )}`
         );
-
         setGstDueDate(gstPeriod.due_date ?? "Not set");
       }
 
@@ -209,7 +211,9 @@ export default function Home() {
 
       if (ewtPeriod) {
         setEwtOpenPeriod(
-          `${ewtPeriod.period_start} to ${ewtPeriod.period_end}`
+          `${formatMaldivesDate(ewtPeriod.period_start)} to ${formatMaldivesDate(
+            ewtPeriod.period_end
+          )}`
         );
 
         setEwtDueDate(ewtPeriod.due_date ?? "Not set");
@@ -247,6 +251,7 @@ export default function Home() {
         setEwtStatus(
           `${ewtPeriodLabel} — Payable: MVR ${totalEwt.toFixed(2)}`
         );
+
       } else {
         setEwtStatus(`${ewtPeriodLabel} — No EWT payable`);
       }
@@ -268,7 +273,9 @@ export default function Home() {
 
       if (nwtPeriod) {
         setNwtOpenPeriod(
-          `${nwtPeriod.period_start} to ${nwtPeriod.period_end}`
+          `${formatMaldivesDate(nwtPeriod.period_start)} to ${formatMaldivesDate(
+            nwtPeriod.period_end
+          )}`
         );
 
         setNwtDueDate(nwtPeriod.due_date ?? "Not set");
@@ -530,7 +537,7 @@ export default function Home() {
                             : "text-slate-500"
                             }`}
                         >
-                          Due: {gstDueDate}
+                          Due: {formatMaldivesDate(gstDueDate)}
                           {isOverdue(gstDueDate) ? " — Overdue" : ""}
                         </div>
                       </div>
@@ -547,7 +554,7 @@ export default function Home() {
                             : "text-slate-500"
                             }`}
                         >
-                          Due: {ewtDueDate}
+                          Due: {formatMaldivesDate(ewtDueDate)}
                           {isOverdue(ewtDueDate) ? " — Overdue" : ""}
                         </div>
                       </div>
@@ -560,11 +567,11 @@ export default function Home() {
                         <div>{nwtOpenPeriod}</div>
                         <div
                           className={`text-xs ${isOverdue(nwtDueDate)
-                              ? "font-semibold text-red-400"
-                              : "text-slate-500"
+                            ? "font-semibold text-red-400"
+                            : "text-slate-500"
                             }`}
                         >
-                          Due: {nwtDueDate}
+                          Due: {formatMaldivesDate(nwtDueDate)}
                           {isOverdue(nwtDueDate) ? " — Overdue" : ""}
                         </div>
                       </div>

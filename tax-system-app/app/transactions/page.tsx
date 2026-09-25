@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate } from "@/lib/dateTime";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -91,7 +92,9 @@ export default function TransactionsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm text-slate-400">
-                      {transaction.transaction_date || "No date"}
+                      {transaction.transaction_date
+                        ? formatMaldivesDate(transaction.transaction_date)
+                        : "No date"}
                     </p>
 
                     <h2 className="mt-1 text-xl font-semibold">

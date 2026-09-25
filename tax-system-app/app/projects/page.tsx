@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate } from "@/lib/dateTime";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);

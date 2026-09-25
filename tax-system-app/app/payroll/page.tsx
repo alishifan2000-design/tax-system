@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate } from "@/lib/dateTime";
 
 export default function PayrollPage() {
   const [payroll, setPayroll] = useState<any[]>([]);
@@ -110,7 +111,9 @@ export default function PayrollPage() {
                       : row.employees?.full_name ?? "Unknown employee"}
                   </td>
 
-                  <td className="p-4">{row.period_month}</td>
+                  <td className="p-4">
+                    {formatMaldivesDate(row.period_month)}
+                  </td>
 
                   <td className="p-4">
                     MVR {Number(row.gross_remuneration || 0).toFixed(2)}

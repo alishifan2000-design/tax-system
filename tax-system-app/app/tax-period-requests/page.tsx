@@ -48,6 +48,7 @@ export default function TaxPeriodRequestsPage() {
           reason,
           status,
           requested_by,
+          reviewed_at,
           created_at,
           tax_periods (
             tax_type,
@@ -132,6 +133,12 @@ export default function TaxPeriodRequestsPage() {
                 <p className="text-xs text-slate-500">
                   Submitted: {formatMaldivesDateTime(request.created_at)}
                 </p>
+
+                {request.reviewed_at && (
+                  <p className="text-xs text-slate-500">
+                    Reviewed: {formatMaldivesDateTime(request.reviewed_at)}
+                  </p>
+                )}
               </div>
 
               <div className="mt-4">

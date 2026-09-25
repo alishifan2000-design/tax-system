@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatMaldivesDate } from "@/lib/dateTime";
 
 export default function TaxRatesPage() {
     const [rates, setRates] = useState<any[]>([]);
@@ -182,7 +183,7 @@ export default function TaxRatesPage() {
                                         </td>
 
                                         <td className="p-4">
-                                            {rate.effective_from}
+                                           {formatMaldivesDate(rate.effective_from)}
                                         </td>
 
                                         <td className="p-4">
@@ -193,7 +194,7 @@ export default function TaxRatesPage() {
                                                     }`}
                                             >
                                                 {rate.effective_to
-                                                    ? `Expired: ${rate.effective_to}`
+                                                    ? `Expired: ${formatMaldivesDate(rate.effective_to)}`
                                                     : "Current"}
                                             </span>
                                         </td>
