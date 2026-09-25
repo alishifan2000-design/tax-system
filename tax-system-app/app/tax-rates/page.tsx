@@ -10,6 +10,7 @@ export default function TaxRatesPage() {
     const [taxTypeFilter, setTaxTypeFilter] = useState("ALL");
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [searchTerm, setSearchTerm] = useState("");
+    const [role, setRole] = useState("");
 
     const filteredRates = rates.filter((rate) => {
         const matchesTaxType =
@@ -42,7 +43,7 @@ export default function TaxRatesPage() {
 
             const { data: membership, error: membershipError } = await supabase
                 .from("organization_users")
-                .select("organization_id")
+                .select("organization_id, role")
                 .eq("user_id", user.id)
                 .single();
 
@@ -50,6 +51,8 @@ export default function TaxRatesPage() {
                 setMessage("Organization not found.");
                 return;
             }
+
+            setRole(membership.role ?? "");
 
             const { data, error } = await supabase
                 .from("tax_rates")
@@ -164,51 +167,53 @@ export default function TaxRatesPage() {
 
                         <tbody>
                             {filteredRates.map((rate) => (
-                                    <tr
-                                        key={rate.id}
-                                        className="border-b border-slate-800 last:border-0"
-                                    >
-                                        <td className="p-4">
-                                            {rate.tax_type}
-                                        </td>
+                                <tr
+                                    key={rate.id}
+                                    className="border-b border-slate-800 last:border-0"
+                                >
+                                    <td className="p-4">
+                                        {rate.tax_type}
+                                    </td>
 
-                                        <td className="p-4">
-                                            {rate.payment_type
-                                                .replaceAll("_", " ")
-                                                .replace(/\b\w/g, (char: string) => char.toUpperCase())}
-                                        </td>
+                                    <td className="p-4">
+                                        {rate.payment_type
+                                            .replaceAll("_", " ")
+                                            .replace(/\b\w/g, (char: string) => char.toUpperCase())}
+                                    </td>
 
-                                        <td className="p-4">
-                                            {Number(rate.rate || 0).toFixed(2)}%
-                                        </td>
+                                    <td className="p-4">
+                                        {Number(rate.rate || 0).toFixed(2)}%
+                                    </td>
 
-                                        <td className="p-4">
-                                           {formatMaldivesDate(rate.effective_from)}
-                                        </td>
+                                    <td className="p-4">
+                                        {formatMaldivesDate(rate.effective_from)}
+                                    </td>
 
-                                        <td className="p-4">
-                                            <span
-                                                className={`rounded-full px-3 py-1 text-xs font-semibold ${rate.effective_to
-                                                    ? "bg-slate-800 text-slate-300"
-                                                    : "bg-emerald-900/40 text-emerald-300"
-                                                    }`}
-                                            >
-                                                {rate.effective_to
-                                                    ? `Expired: ${formatMaldivesDate(rate.effective_to)}`
-                                                    : "Current"}
-                                            </span>
-                                        </td>
+                                    <td className="p-4">
+                                        <span
+                                            className={`rounded-full px-3 py-1 text-xs font-semibold ${rate.effective_to
+                                                ? "bg-slate-800 text-slate-300"
+                                                : "bg-emerald-900/40 text-emerald-300"
+                                                }`}
+                                        >
+                                            {rate.effective_to
+                                                ? `Expired: ${formatMaldivesDate(rate.effective_to)}`
+                                                : "Current"}
+                                        </span>
+                                    </td>
 
-                                        <td className="p-4">
+                                    <td className="p-4">
+                                        {["admin", "senior"].includes(role.toLowerCase()) && (
                                             <a
                                                 href={`/tax-rates/${rate.id}/edit`}
                                                 className="text-blue-400 hover:underline"
                                             >
                                                 Edit
                                             </a>
-                                        </td>
-                                    </tr>
-                                ))}
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

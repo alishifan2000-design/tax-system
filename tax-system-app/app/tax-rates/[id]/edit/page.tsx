@@ -46,7 +46,7 @@ export default function EditTaxRatePage() {
   async function updateTaxRate() {
     setMessage("Saving...");
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("tax_rates")
       .update({
         tax_type: taxType,
@@ -55,10 +55,16 @@ export default function EditTaxRatePage() {
         effective_from: effectiveFrom,
         effective_to: effectiveTo || null,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id");
 
     if (error) {
       setMessage(error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setMessage("You do not have permission to update tax rates.");
       return;
     }
 
@@ -74,7 +80,7 @@ export default function EditTaxRatePage() {
         >
           ←
         </button>
-        
+
         <p className="text-sm text-slate-400">TAX SYSTEM</p>
 
         <h1 className="mt-2 text-3xl font-bold">
