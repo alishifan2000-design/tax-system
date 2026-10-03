@@ -62,12 +62,14 @@ export default function TaxPeriodsPage() {
                         <h1 className="mt-1 text-3xl font-bold">Tax Periods</h1>
                     </div>
 
-                    <a
-                        href="/tax-periods/new"
-                        className="rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
-                    >
-                        Add Tax Period
-                    </a>
+                    {["admin", "senior"].includes(role.toLowerCase()) && (
+                        <a
+                            href="/tax-periods/new"
+                            className="rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
+                        >
+                            Add Tax Period
+                        </a>
+                    )}
                 </div>
 
                 {message ? (
