@@ -41,6 +41,25 @@ export default function LoginPage() {
     window.location.href = "/";
   }
 
+  async function resetPassword() {
+    if (!email) {
+      setMessage("Enter your email address first.");
+      return;
+    }
+
+    setMessage("Sending password reset email...");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setMessage("Password reset email sent. Check your inbox.");
+  }
   return (
     <main className="min-h-screen bg-slate-950 p-6 text-white">
       <div className="mx-auto max-w-md rounded-3xl bg-slate-900 p-8">
@@ -86,6 +105,13 @@ export default function LoginPage() {
           className="mt-3 w-full rounded-xl border border-slate-700 p-3 font-semibold"
         >
           Create Account
+        </button>
+
+        <button
+          onClick={resetPassword}
+          className="mt-3 w-full rounded-xl border border-slate-700 p-3 font-semibold"
+        >
+          Forgot Password
         </button>
 
         {message && (

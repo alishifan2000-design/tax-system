@@ -85,12 +85,15 @@ export default function TaxRatesPage() {
                         <h1 className="mt-2 text-3xl font-bold">Tax Rates</h1>
                     </div>
 
-                    <a
-                        href="/tax-rates/new"
-                        className="rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
-                    >
-                        Add Tax Rate
-                    </a>
+                    {["admin", "senior"].includes(role.toLowerCase()) && (
+                        <a
+                            href="/tax-rates/new"
+                            className="rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
+                        >
+                            Add Tax Rate
+                        </a>
+                    )}
+                    
                 </div>
                 {message && (
                     <p className="mb-4 text-sm text-slate-300">
