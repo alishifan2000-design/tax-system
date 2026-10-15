@@ -8,6 +8,7 @@ import { formatMaldivesDate } from "@/lib/dateTime";
 export default function PayrollPage() {
   const [payroll, setPayroll] = useState<any[]>([]);
   const [message, setMessage] = useState("Loading payroll...");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     async function loadPayroll() {
@@ -22,7 +23,7 @@ export default function PayrollPage() {
 
       const { data: membership, error: membershipError } = await supabase
         .from("organization_users")
-        .select("organization_id")
+        .select("organization_id, role")
         .eq("user_id", user.id)
         .single();
 
@@ -30,6 +31,8 @@ export default function PayrollPage() {
         setMessage("Organization not found.");
         return;
       }
+
+      setRole(membership.role ?? "");
 
       const { data, error } = await supabase
         .from("employee_payroll")
@@ -73,12 +76,14 @@ export default function PayrollPage() {
             <h1 className="mt-2 text-3xl font-bold">Payroll</h1>
           </div>
 
-          <Link
-            href="/payroll/new"
-            className="rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
-          >
-            Add Payroll
-          </Link>
+          {["admin", "senior"].includes(role.toLowerCase()) && (
+            <Link
+              href="/payroll/new"
+              className="rounded-xl bg-white px-4 py-3 font-semibold text-slate-950"
+            >
+              Add Payroll
+            </Link>
+          )}
         </div>
 
         {message && (
